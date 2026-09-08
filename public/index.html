@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>飞书助手网关</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/lucide.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><div class="brand"><i data-lucide="network"></i><h1>飞书助手网关</h1></div><span class="host">LOCAL</span></header>
+  <main>
+    <section class="account">
+      <img id="avatar" class="avatar" alt="助手头像" hidden>
+      <div class="avatar placeholder" id="avatar-placeholder"><i data-lucide="bot"></i></div>
+      <div class="identity"><h2 id="assistant-name">连接配置</h2><span id="status" role="status" class="status pending">正在连接</span></div>
+      <button id="check" class="command" disabled><i data-lucide="refresh-cw"></i><span>检查连接</span></button>
+    </section>
+    <p id="error" class="error" role="alert" hidden></p>
+    <section class="settings" aria-label="客户端连接配置">
+      <div class="section-heading"><h2>客户端连接</h2><button id="copy-config" class="command" disabled><i data-lucide="copy"></i><span>复制配置</span></button></div>
+      <div class="row"><label for="base-url">Base URL</label><div class="field"><input id="base-url" readonly value="" spellcheck="false"><button class="icon-button copy" data-field="base-url" title="复制 Base URL" aria-label="复制 Base URL" disabled><i data-lucide="copy"></i></button></div></div>
+      <div class="row"><label for="model">模型</label><div class="field"><input id="model" readonly value="" spellcheck="false"><button class="icon-button copy" data-field="model" title="复制模型名" aria-label="复制模型名" disabled><i data-lucide="copy"></i></button></div></div>
+      <div class="row"><label for="api-key">API Key</label><div class="field"><input id="api-key" type="password" readonly value="" spellcheck="false" autocomplete="off"><button id="reveal" class="icon-button" title="显示密钥" aria-label="显示密钥" disabled><i data-lucide="eye"></i></button><button class="icon-button copy" data-field="api-key" title="复制 API Key" aria-label="复制 API Key" disabled><i data-lucide="copy"></i></button></div></div>
+      <div class="row metadata"><span>接口</span><strong>OpenAI Chat Completions</strong></div>
+      <div class="row metadata"><span>访问范围</span><strong>当前电脑</strong></div>
+    </section>
+    <footer><span id="checked-at">尚未检查</span><span id="copy-status" role="status"></span></footer>
+  </main>
+</body>
+</html>

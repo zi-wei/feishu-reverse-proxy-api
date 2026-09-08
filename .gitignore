@@ -1,0 +1,10 @@
+node_modules/
+*.zip
+*.log
+*.dpapi
+config.json
+conversations.json
+state.json
+browser-profile/
+coverage/
+.DS_Store

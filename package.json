@@ -1,0 +1,21 @@
+{
+  "name": "aily-openai",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "package:windows": "node build-portable.mjs D:/ao/1gpt/outputs/aily-openai-windows-x64.zip"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "lucide": "1.42.0",
+    "playwright-core": "1.63.0"
+  },
+  "devDependencies": {
+    "openai": "7.10.0"
+  }
+}
