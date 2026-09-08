@@ -1,10 +1,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { chromium } from 'playwright-core';
 import { AilyClient, ApiError } from './bridge.mjs';
 
 export function browserExecutable() {
+  if (process.platform !== 'win32') {
+    const candidates = [process.env.CHROME_PATH, process.env.GOOGLE_CHROME_BIN, '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/microsoft-edge'].filter(Boolean);
+    for (const candidate of candidates) {
+      if (path.isAbsolute(candidate) && fs.existsSync(candidate)) return candidate;
+      const result = spawnSync('which', [candidate], { encoding: 'utf8' });
+      if (result.status === 0 && result.stdout.trim()) return result.stdout.trim();
+    }
+    return undefined;
+  }
   const roots = [process.env.ProgramFiles, process.env['ProgramFiles(x86)'], process.env.LOCALAPPDATA].filter(Boolean);
   return roots.flatMap(root => [path.join(root, 'Google/Chrome/Application/chrome.exe'), path.join(root, 'Microsoft/Edge/Application/msedge.exe')]).find(file => fs.existsSync(file));
 }

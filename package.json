@@ -1,6 +1,6 @@
 {
   "name": "aily-openai",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "package:windows": "node build-portable.mjs D:/ao/1gpt/outputs/aily-openai-windows-x64.zip"
+    "package:windows": "node build-portable.mjs D:/ao/1gpt/outputs/aily-openai-windows-x64.zip",
+    "package:linux": "node build-linux.mjs D:/ao/1gpt/outputs/aily-openai-linux-x64.tar.gz"
   },
   "dependencies": {
     "ajv": "8.20.0",
@@ -16,6 +17,7 @@
     "playwright-core": "1.63.0"
   },
   "devDependencies": {
-    "openai": "7.10.0"
+    "openai": "7.10.0",
+    "tar-stream": "^3.1.7"
   }
 }

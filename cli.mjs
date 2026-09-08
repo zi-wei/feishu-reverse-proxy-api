@@ -94,8 +94,9 @@ async function openConnectionPage(cfg, auth) {
   const response = await fetch(`${endpoint(cfg)}/_local/setup`, { method: 'POST', headers: { authorization: `Bearer ${auth.apiKey}` }, signal: AbortSignal.timeout(5000) });
   if (!response.ok) throw new ApiError(502, 'portal_unavailable', 'Restart the gateway to open the connection page.');
   const result = await response.json();
-  const shell = process.env.ComSpec || 'C:/Windows/System32/cmd.exe';
-  const child = spawn(shell, ['/c', 'start', '', result.url], { detached: true, windowsHide: true, stdio: 'ignore' });
+  const opener = process.platform === 'win32' ? (process.env.ComSpec || 'C:/Windows/System32/cmd.exe') : process.platform === 'darwin' ? 'open' : 'xdg-open';
+  const openerArgs = process.platform === 'win32' ? ['/c', 'start', '', result.url] : [result.url];
+  const child = spawn(opener, openerArgs, { detached: true, windowsHide: true, stdio: 'ignore' });
   await new Promise((resolve, reject) => { child.once('spawn', resolve); child.once('error', reject); });
   child.unref();
   return result.url;
@@ -118,12 +119,13 @@ async function main() {
       connect: '启动本地服务, 必要时扫码登录, 并打开连接配置页.', reconnect: '用新浏览器配置扫码登录并生成新 API Key.',
       login: '扫码登录并自动识别助手. 可选: --agent <id>.', start: '启动后台网关. 可选: --port <1024-65535>.',
       stop: '停止本地网关.', status: '查看网关状态.', doctor: '检查登录状态和助手权限.', config: '查看 Base URL, API Key 和模型名.',
-      package: '构建不含账号数据的 Windows 分发包. 指定 --output <zip>.',
+      package: '构建不含账号数据的 Windows 分发包. 指定 --output <zip>.', 'package-linux': '构建不含账号数据的 Linux 分发包. 指定 --output <tar.gz>.',
     }, data_directory: dataDir }); return;
   }
-  if (command === 'package') {
-    if (!output) throw new ApiError(400, 'output_required', 'Specify --output <zip>.');
-    const { buildPortable } = await import('./build-portable.mjs'); emit(await buildPortable(output)); return;
+  if (command === 'package' || command === 'package-linux') {
+    if (!output) throw new ApiError(400, 'output_required', `Specify --output <${command === 'package-linux' ? 'tar.gz' : 'zip'}>.`);
+    const builder = command === 'package-linux' ? './build-linux.mjs' : './build-portable.mjs';
+    const { buildPortable } = await import(builder); emit(await buildPortable(output)); return;
   }
   if (command === 'login') { cfg = await login(cfg, { requestedAgent }); emit({ logged_in: true, workspace_id: cfg.workspaceId, model: cfg.model }); return; }
   if (command === 'status') { emit({ running: Boolean(hasAccount(cfg) && await ownedHealth(cfg, loadAuth())), base_url: `${endpoint(cfg)}/v1` }); return; }
@@ -138,7 +140,7 @@ async function main() {
   if (!hasAccount(cfg)) throw new ApiError(401, 'login_required', '请运行 aily-openai connect, 扫码登录自己的飞书账号.');
   const auth = loadAuth();
   if (command === 'config') { emit({ base_url: `${endpoint(cfg)}/v1`, api_key: auth.apiKey, model: cfg.model }); return; }
-  if (command === 'doctor') { await checkUpstream(cfg, auth); emit({ ok: true, node: process.version, credentials: 'Windows DPAPI CurrentUser', upstream_authenticated: true, agent_access: true, running: Boolean(await ownedHealth(cfg, auth)), base_url: `${endpoint(cfg)}/v1`, model: cfg.model }); return; }
+  if (command === 'doctor') { await checkUpstream(cfg, auth); emit({ ok: true, node: process.version, credentials: process.platform === 'win32' ? 'Windows DPAPI CurrentUser' : 'file mode 0600', upstream_authenticated: true, agent_access: true, running: Boolean(await ownedHealth(cfg, auth)), base_url: `${endpoint(cfg)}/v1`, model: cfg.model }); return; }
   if (command === 'start') {
     if (cfg.port !== previousPort && await ownedHealth({ ...cfg, port: previousPort }, auth)) throw new ApiError(409, 'server_running', 'Stop the current instance before changing ports.');
     cfg = await startGateway(cfg, auth); emit({ running: true, base_url: `${endpoint(cfg)}/v1`, model: cfg.model }); return;

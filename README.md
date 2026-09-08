@@ -2,7 +2,7 @@
 
 将当前登录账号可访问的飞书助手接入支持 OpenAI Chat Completions 的客户端.
 
-## 分发版
+## Windows 分发版
 
 1. 解压 `aily-openai-windows-x64.zip`, 不要直接在压缩包内运行.
 2. 双击 `Connect to Feishu.cmd`.
@@ -16,7 +16,18 @@
 
 需要切换账号时双击 `Reconnect Account.cmd`. 电脑重启后双击 `Start Gateway.cmd`; 需要重新查看配置时再次双击 `Connect to Feishu.cmd`. 停止服务时双击 `Stop Gateway.cmd`.
 
-系统要求: Windows 10/11 x64, Microsoft Edge 或 Google Chrome, 可访问飞书网站. 分发包已携带 Node.js 运行时和程序依赖, 不要求用户安装 Node.js, Codex 或开发工具.
+系统要求: Windows 10/11 x64, Microsoft Edge 或 Google Chrome, 可访问飞书网站. Windows 分发包已携带 Node.js 运行时和程序依赖, 不要求用户安装 Node.js, Codex 或开发工具.
+
+## Linux 分发版
+
+1. 下载 `feishu-reverse-proxy-api-linux-x64.tar.gz`, 解压到用户有写权限的目录.
+2. 在解压目录执行 `./connect-feishu.sh`, 或执行 `./connect-lele.sh` 连接乐乐.
+3. 首次使用时, 在自动打开的 Chrome 或 Chromium 中扫码登录自己的飞书账号.
+4. 工具自动启动本地网关并显示连接配置页. 将 Base URL, API Key 和模型名填入支持 OpenAI Chat Completions 的客户端.
+
+Linux 版本使用 `$HOME/.local/state/aily-openai` 保存配置, 凭据文件权限为 `0600`, 不依赖 Windows DPAPI. 系统需要 x86_64 Linux, glibc 2.28 或更高版本, Chrome 或 Chromium, 以及 `xdg-open`.
+
+需要切换账号时执行 `./reconnect-account.sh`. 系统重启后执行 `./start-gateway.sh`; 需要重新查看配置时再次执行 `./connect-feishu.sh`. 停止服务时执行 `./stop-gateway.sh`. Linux 分发包已携带 Linux x64 Node.js 运行时和程序依赖.
 
 ## 配置客户端
 
@@ -97,7 +108,7 @@ aily-openai --help
 - 不直接提供 MCP 传输端点. 使用能将 MCP 工具转换为 OpenAI `tools` 并执行调用的客户端.
 - 客户端断开或请求超时会停止本地等待, 不保证停止已经开始的云端任务. 此时先在飞书确认任务状态再重试.
 - 不删除生成的任务. 网关持久化的会话映射只包含历史哈希, 任务 ID 和游标, 不保存聊天明文.
-- 登录凭据及本地 API Key 使用 Windows DPAPI CurrentUser 加密, 只可由当前 Windows 账号解密. 不分享浏览器配置目录和凭据文件.
+- Windows 登录凭据及本地 API Key 使用 DPAPI CurrentUser 加密, 只可由当前 Windows 账号解密. Linux 将凭据保存到权限为 `0600` 的本地文件. 不分享浏览器配置目录和凭据文件.
 
 ## 验证
 

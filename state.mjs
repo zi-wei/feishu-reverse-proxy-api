@@ -6,10 +6,13 @@ import { fileURLToPath } from 'node:url';
 const installFile = fileURLToPath(new URL('./installation.json', import.meta.url));
 let installation = {};
 try { installation = JSON.parse(fs.readFileSync(installFile, 'utf8')); } catch {}
-const configuredDir = installation.dataDir?.replace(/%([A-Za-z_][A-Za-z0-9_]*)%/g, (_, name) => process.env[name] || `%${name}%`);
+const configuredDir = installation.dataDir?.replace(/%([A-Za-z_][A-Za-z0-9_]*)%|\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, percent, braced, bare) => {
+  const name = percent || braced || bare;
+  return process.env[name] || match;
+});
 export const dataDir = process.env.AILY_DATA_DIR || configuredDir || fileURLToPath(new URL('./data', import.meta.url));
 export const configPath = path.join(dataDir, 'config.json');
-export const authPath = path.join(dataDir, 'credentials.dpapi');
+export const authPath = path.join(dataDir, process.platform === 'win32' ? 'credentials.dpapi' : 'credentials.json');
 export const statePath = path.join(dataDir, 'conversations.json');
 
 export function readJson(file, initial) {
@@ -36,11 +39,13 @@ function dpapi(value, decrypt) {
 
 export function saveAuth(auth) {
   fs.mkdirSync(dataDir, { recursive: true });
+  if (process.platform !== 'win32') { writeJson(authPath, auth); return; }
   const temp = `${authPath}.${process.pid}.tmp`;
   fs.writeFileSync(temp, dpapi(Buffer.from(JSON.stringify(auth)), false), { mode: 0o600 });
   fs.renameSync(temp, authPath);
 }
 
 export function loadAuth() {
+  if (process.platform !== 'win32') return readJson(authPath);
   return JSON.parse(dpapi(fs.readFileSync(authPath), true).toString('utf8'));
 }
