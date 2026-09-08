@@ -1,4 +1,4 @@
-# 飞书助手本地 API
+# 飞书反代 API
 
 将当前登录账号可访问的飞书助手接入支持 OpenAI Chat Completions 的客户端.
 
